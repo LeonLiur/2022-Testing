@@ -50,6 +50,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
 
     // testing code for limelight here:
+    // displaying reading of limelight
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
     NetworkTableEntry tx = table.getEntry("tx");
     NetworkTableEntry ty = table.getEntry("ty");
