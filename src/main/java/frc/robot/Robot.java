@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,7 +17,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the
- * name of this class or the package after creating this project, you must also update the
+ * name of this class or the package after creating this project, you must also
+ * update the
  * build.gradle file in the
  * project.
  */
@@ -60,7 +62,6 @@ public class Robot extends TimedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
 
-    
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -91,6 +92,27 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
   }
 
+  // returns the distance (hypotenuse) from the robot
+  private double getDistance(double ty, double height){
+    ty = Math.toRadians(ty);
+    try{
+      ty %= 360;
+      return height / Math.sin(ty);
+    }catch(ArithmeticException e){
+      System.out.println("Caught arithmetic exception");
+      return height / Math.sin(ty + 1);
+    }
+  }
+
+  private double getDistWithActFormula(double ty, double height){
+    try{
+      return height/Math.tan(ty);
+    }catch(ArithmeticException e){
+      System.out.println("bad");
+      return height/Math.tan(ty+0.01);
+    }
+  }
+
   @Override
   public void teleopInit() {
     // This makes sure that the autonomous stops running when
@@ -107,46 +129,36 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     // testing code for limelight here:
     // displaying reading of limelight
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-test");
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+    NetworkTableEntry tv = table.getEntry("tv");
     NetworkTableEntry tx = table.getEntry("tx");
     NetworkTableEntry ty = table.getEntry("ty");
     NetworkTableEntry ta = table.getEntry("ta");
-    NetworkTableEntry tv = table.getEntry("tv");
-
-    System.out.println("PRAYING TO THE GOD OF RNG ");
-    double ran = Math.random() * 10;
-    System.out.println("THE GOD HAS SAID " + ran);
-
-    // double[] setVal = {420, 420, 420};
-    // table.getEntry("camtran").setDoubleArray(setVal);
-    table.getEntry("ledMode").setNumber(2);
-
-    // if(tx == null)  System.out.println("tx is null");
 
     // read values periodically
-    
-      double x = tx.getDouble(0.0);
-      double y = ty.getDouble(0.0);
-      double area = ta.getDouble(0.0);
-      double v = tv.getDouble(0.0);
+    double v = tv.getDouble(0.0);
+    double x = tx.getDouble(0.0);
+    x = Math.round(x * 100) / 100;
+    double y = ty.getDouble(0.0);
+    y = Math.round(y * 100) / 100;
+    double area = ta.getDouble(0.0);
 
-      SmartDashboard.putNumber("LimelightX", x);
-      SmartDashboard.putNumber("LimelightY", y);
-      SmartDashboard.putNumber("LimelightArea", area);
-      SmartDashboard.putNumber("Valid Targets", v);
     
-    
-    
-    // double[] ctArr = ct.getDoubleArray(def);
-
-    // boolean nullFlag = false;
-    // for(int i = 0; i < 3; i++)  if(ctArr[i] == 69)  nullFlag = true;
-
-    // System.out.println(nullFlag?"[-] Null value" : ctArr[0] + " " + ctArr[1] + " " + ctArr[2]);
-    //System.out.printf("x: %s; y: %s; area: %s; v: %s\n", x, y, area, v);
 
     // post to smart dashboard periodically
-    
+    SmartDashboard.putNumber("Valid Targets", v);
+    SmartDashboard.putNumber("LimelightX", x);
+    SmartDashboard.putNumber("LimelightY", y);
+    SmartDashboard.putNumber("LimelightArea", area);
+
+    table.getEntry("ledMode").setNumber(2);
+    // if target detected
+    if(v != 0){
+      System.out.printf("the distance found is %s\n", getDistance(y, 5.1));
+      // System.out.printf("actual distance: %s\n", getDistWithActFormula(y, 5.1));
+      SmartDashboard.putNumber("Dist", getDistance(y, 5.1));
+    }
+
   }
 
   @Override
