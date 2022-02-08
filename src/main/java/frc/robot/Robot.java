@@ -16,8 +16,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the
- * name of this class or
- * the package after creating this project, you must also update the
+ * name of this class or the package after creating this project, you must also update the
  * build.gradle file in the
  * project.
  */
@@ -108,20 +107,46 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     // testing code for limelight here:
     // displaying reading of limelight
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-test");
     NetworkTableEntry tx = table.getEntry("tx");
     NetworkTableEntry ty = table.getEntry("ty");
     NetworkTableEntry ta = table.getEntry("ta");
+    NetworkTableEntry tv = table.getEntry("tv");
+
+    System.out.println("PRAYING TO THE GOD OF RNG ");
+    double ran = Math.random() * 10;
+    System.out.println("THE GOD HAS SAID " + ran);
+
+    // double[] setVal = {420, 420, 420};
+    // table.getEntry("camtran").setDoubleArray(setVal);
+    table.getEntry("ledMode").setNumber(2);
+
+    // if(tx == null)  System.out.println("tx is null");
 
     // read values periodically
-    double x = tx.getDouble(0.0);
-    double y = ty.getDouble(0.0);
-    double area = ta.getDouble(0.0);
+    
+      double x = tx.getDouble(0.0);
+      double y = ty.getDouble(0.0);
+      double area = ta.getDouble(0.0);
+      double v = tv.getDouble(0.0);
+
+      SmartDashboard.putNumber("LimelightX", x);
+      SmartDashboard.putNumber("LimelightY", y);
+      SmartDashboard.putNumber("LimelightArea", area);
+      SmartDashboard.putNumber("Valid Targets", v);
+    
+    
+    
+    // double[] ctArr = ct.getDoubleArray(def);
+
+    // boolean nullFlag = false;
+    // for(int i = 0; i < 3; i++)  if(ctArr[i] == 69)  nullFlag = true;
+
+    // System.out.println(nullFlag?"[-] Null value" : ctArr[0] + " " + ctArr[1] + " " + ctArr[2]);
+    //System.out.printf("x: %s; y: %s; area: %s; v: %s\n", x, y, area, v);
 
     // post to smart dashboard periodically
-    SmartDashboard.putNumber("LimelightX", x);
-    SmartDashboard.putNumber("LimelightY", y);
-    SmartDashboard.putNumber("LimelightArea", area);
+    
   }
 
   @Override
