@@ -9,6 +9,9 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -124,6 +127,15 @@ public class Robot extends TimedRobot {
     }
   }
 
+  // initialize previous X, previous Y, and previous area
+  double prevX = 0;
+  double prevY = 0;
+  double prevArea = 0;
+  double prevHor = 0;
+  double preVert = 0;
+  int xFlucCount = 0, yFlucCount = 0, areaFlucCount = 0, vertFlucCount = 0, horFlucCount = 0;
+  final double EPSILON = 1;
+
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
@@ -134,30 +146,62 @@ public class Robot extends TimedRobot {
     NetworkTableEntry tx = table.getEntry("tx");
     NetworkTableEntry ty = table.getEntry("ty");
     NetworkTableEntry ta = table.getEntry("ta");
+    NetworkTableEntry tHor = table.getEntry("thor");
+    NetworkTableEntry tVert = table.getEntry("tvert");
+
 
     // read values periodically
     double v = tv.getDouble(0.0);
     double x = tx.getDouble(0.0);
-    x = Math.round(x * 100) / 100;
+    // x = Math.round(x * 100) / 100;
     double y = ty.getDouble(0.0);
-    y = Math.round(y * 100) / 100;
+    // y = Math.round(y * 100) / 100;
     double area = ta.getDouble(0.0);
+    double hor = tHor.getDouble(0.0);
+    double vert = tVert.getDouble(0.0);
 
+
+    if(Math.abs(x - prevX) >= EPSILON){
+      xFlucCount ++;
+    }
+    if(Math.abs(y - prevY) >= EPSILON){
+      yFlucCount ++;
+    }
+    if(Math.abs(area - prevArea) >= Math.sqrt(EPSILON)){
+      areaFlucCount ++;
+    }
+    if(Math.abs(hor - prevHor) >= EPSILON){
+      horFlucCount ++;
+    }
+    if(Math.abs(vert - preVert) >= EPSILON){
+      vertFlucCount ++;
+    }
+
+    System.out.printf("x fluctuate count: %s, y fluctuate: %s," +  
+    "area fluctuate: %s hor: %s, vert: %s\n",
+    xFlucCount, yFlucCount, areaFlucCount, horFlucCount, vertFlucCount);
     
+    prevX = x;
+    prevY = y;
+    prevArea = area;
+    prevHor = hor;
+    preVert = vert;
 
     // post to smart dashboard periodically
     SmartDashboard.putNumber("Valid Targets", v);
     SmartDashboard.putNumber("LimelightX", x);
     SmartDashboard.putNumber("LimelightY", y);
     SmartDashboard.putNumber("LimelightArea", area);
+    SmartDashboard.putNumber("hor", hor);
+    SmartDashboard.putNumber("vert", vert);
 
-    table.getEntry("ledMode").setNumber(2);
-    // if target detected
-    if(v != 0){
-      System.out.printf("the distance found is %s\n", getDistance(y, 5.1));
-      // System.out.printf("actual distance: %s\n", getDistWithActFormula(y, 5.1));
-      SmartDashboard.putNumber("Dist", getDistance(y, 5.1));
-    }
+    // table.getEntry("ledMode").setNumber(2);
+    // // if target detected
+    // if(v != 0){
+    //   System.out.printf("the distance found is %s\n", getDistance(y, 5.1));
+    //   // System.out.printf("actual distance: %s\n", getDistWithActFormula(y, 5.1));
+    //   SmartDashboard.putNumber("Dist", getDistance(y, 5.1));
+    // }
 
   }
 
